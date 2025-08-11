@@ -1,0 +1,92 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define MAX 100
+
+int adj[MAX][MAX];
+int visited[MAX];
+int n, m;
+int source, target;
+
+int foundDFS = 0;
+void DFS(int u) {
+    printf("%d ", u);
+    if (u == target) foundDFS = 1;
+    visited[u] = 1;
+    for (int v = 0; v < n; v++) {
+        if (adj[u][v] && !visited[v])
+            DFS(v);
+    }
+}
+
+struct queue {
+    int size, f, r, *arr;
+};
+
+int isEmpty(struct queue *q) { return q->f == q->r; }
+void enqueue(struct queue *q, int val) { q->arr[++q->r] = val; }
+int dequeue(struct queue *q) { return q->arr[++q->f]; }
+
+int foundBFS = 0;
+void BFS(int start) {
+    struct queue q;
+    q.size = MAX;
+    q.f = q.r = -1;
+    q.arr = (int*) malloc(q.size * sizeof(int));
+
+    int vis[MAX] = {0};
+    enqueue(&q, start);
+    vis[start] = 1;
+
+    while (!isEmpty(&q)) {
+        int u = dequeue(&q);
+        printf("%d ", u);
+        if (u == target) foundBFS = 1;
+        for (int v = 0; v < n; v++) {
+            if (adj[u][v] && !vis[v]) {
+                enqueue(&q, v);
+                vis[v] = 1;
+            }
+        }
+    }
+    free(q.arr);
+}
+
+int main() {
+    printf("Enter number of vertices: ");
+    scanf("%d", &n);
+    printf("Enter number of edges: ");
+    scanf("%d", &m);
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            adj[i][j] = 0;
+
+    printf("Enter edges:\n");
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        scanf("%d %d", &u, &v);
+        adj[u][v] = adj[v][u] = 1;
+    }
+
+    printf("Enter source node: ");
+    scanf("%d", &source);
+    printf("Enter target node: ");
+    scanf("%d", &target);
+
+    for (int i = 0; i < n; i++) visited[i] = 0;
+    printf("\nDFS Traversal: ");
+    DFS(source);
+    printf("\n");
+
+    printf("BFS Traversal: ");
+    BFS(source);
+    printf("\n");
+
+    printf("Path exists from %d to %d (DFS): %s\n", source, target, foundDFS ? "Yes" : "No");
+    printf("Path exists from %d to %d (BFS): %s\n", source, target, foundBFS ? "Yes" : "No");
+
+    return 0;
+}
+
+
