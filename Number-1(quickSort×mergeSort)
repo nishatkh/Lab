@@ -1,0 +1,103 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+void merge(int A[], int low, int mid, int high) {
+    int i = low, j = mid + 1, k = low;
+    int B[100000];
+
+    while (i <= mid && j <= high) {
+        if (A[i] < A[j]) {
+            B[k++] = A[i++];
+        } else {
+            B[k++] = A[j++];
+        }
+    }
+    while (i <= mid) {
+        B[k++] = A[i++];
+    }
+    while (j <= high) {
+        B[k++] = A[j++];
+    }
+    for (int m = low; m <= high; m++) {
+        A[m] = B[m];
+    }
+}
+
+void mergeSort(int A[], int low, int high) {
+    if (low < high) {
+        int mid = (low + high) / 2;
+        mergeSort(A, low, mid);
+        mergeSort(A, mid + 1, high);
+        merge(A, low, mid, high);
+    }
+}
+
+int partition(int A[], int low, int high) {
+    int pivot = A[high];
+    int i = low - 1, temp;
+
+    for (int j = low; j < high; j++) {
+        if (A[j] <= pivot) {
+            i++;
+            temp = A[i]; A[i] = A[j]; A[j] = temp;
+        }
+    }
+    temp = A[i + 1]; A[i + 1] = A[high]; A[high] = temp;
+    return i + 1;
+}
+
+void quickSort(int A[], int low, int high) {
+    if (low < high) {
+        int pi = partition(A, low, high);
+        quickSort(A, low, pi - 1);
+        quickSort(A, pi + 1, high);
+    }
+}
+
+void printArray(int *A, int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%d ", A[i]);
+    }
+}
+
+double get_time_sec() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return ts.tv_sec + ts.tv_nsec / 1e9;
+}
+
+int main() {
+    int n;
+    printf("Enter number of elements: ");
+    scanf("%d", &n);
+
+    int arr1[n], arr2[n];
+    printf("Enter array elements: ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &arr1[i]);
+        arr2[i] = arr1[i];
+    }
+
+    double start, end, merge_time, quick_time;
+
+    start = get_time_sec();
+    mergeSort(arr1, 0, n - 1);
+    end = get_time_sec();
+    merge_time = end - start;
+
+    start = get_time_sec();
+    quickSort(arr2, 0, n - 1);
+    end = get_time_sec();
+    quick_time = end - start;
+
+    printf("\nMerge Sort Result: ");
+    printArray(arr1, n);
+    printf("\nQuick Sort Result: ");
+    printArray(arr2, n);
+
+    printf("\nMerge Sort Time: %.5f sec", merge_time);
+    printf("\nQuick Sort Time: %.5f sec\n", quick_time);
+
+    return 0;
+}
