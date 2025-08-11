@@ -25,6 +25,16 @@ const char *locationNames[V] = {
     "YKSG-1"
 };
 
+void printResult(int dist[]) {
+    printf("Node\tDistance\tLocation Name\n");
+    for (int i = 0; i < V; i++) {
+        if (dist[i] == INF)
+            printf("%d\tINF\t\t%s\n", i, locationNames[i]);
+        else
+            printf("%d\t%d\t\t%s\n", i, dist[i], locationNames[i]);
+    }
+}
+
 void dijkstra(int graph[V][V], int src) {
     int dist[V], visited[V];
     for (int i = 0; i < V; i++) {
@@ -44,10 +54,7 @@ void dijkstra(int graph[V][V], int src) {
             if (!visited[v] && graph[u][v] != INF && dist[u] + graph[u][v] < dist[v])
                 dist[v] = dist[u] + graph[u][v];
     }
-    printf("\nDijkstra's Algorithm (No negative edges):\n");
-    printf("Node\tDistance\tLocation Name\n");
-    for (int i = 0; i < V; i++)
-        printf("%d\t%d\t\t%s\n", i, dist[i], locationNames[i]);
+    printResult(dist);
 }
 
 void bellmanFord(struct Edge edges[], int edgeCount, int src) {
@@ -69,14 +76,11 @@ void bellmanFord(struct Edge edges[], int edgeCount, int src) {
         int v = edges[j].dest;
         int weight = edges[j].weight;
         if (dist[u] != INF && dist[u] + weight < dist[v]) {
-            printf("\nGraph contains a negative weight cycle.\n");
+            printf("Graph contains a negative weight cycle.\n");
             return;
         }
     }
-    printf("\nBellman-Ford Algorithm (Handles negative edges):\n");
-    printf("Node\tDistance\tLocation Name\n");
-    for (int i = 0; i < V; i++)
-        printf("%d\t%d\t\t%s\n", i, dist[i], locationNames[i]);
+    printResult(dist);
 }
 
 int main() {
@@ -112,6 +116,7 @@ int main() {
     graph[12][13] = 2;
     graph[13][12] = 2;
 
+    printf("Dijkstra (Non-negative edges):\n");
     dijkstra(graph, 0);
 
     struct Edge edges[] = {
@@ -124,6 +129,7 @@ int main() {
     };
     int edgeCount = sizeof(edges)/sizeof(edges[0]);
 
+    printf("\nBellman-Ford (Handles negative edges):\n");
     bellmanFord(edges, edgeCount, 0);
 
     return 0;
