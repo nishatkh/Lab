@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <limits.h>
 
@@ -28,13 +27,11 @@ const char *locationNames[V] = {
 
 void dijkstra(int graph[V][V], int src) {
     int dist[V], visited[V];
-
     for (int i = 0; i < V; i++) {
         dist[i] = INF;
         visited[i] = 0;
     }
     dist[src] = 0;
-
     for (int count = 0; count < V - 1; count++) {
         int min = INF, u = -1;
         for (int v = 0; v < V; v++)
@@ -42,19 +39,15 @@ void dijkstra(int graph[V][V], int src) {
                 min = dist[v];
                 u = v;
             }
-
         visited[u] = 1;
-
         for (int v = 0; v < V; v++)
             if (!visited[v] && graph[u][v] != INF && dist[u] + graph[u][v] < dist[v])
                 dist[v] = dist[u] + graph[u][v];
     }
-
     printf("\nDijkstra's Algorithm (No negative edges):\n");
     printf("Node\tDistance\tLocation Name\n");
-    printf("----\t--------\t--------------\n");
     for (int i = 0; i < V; i++)
-        printf("%d\t\t\t%d\t\t%s\n", i, dist[i], locationNames[i]);
+        printf("%d\t%d\t\t%s\n", i, dist[i], locationNames[i]);
 }
 
 void bellmanFord(struct Edge edges[], int edgeCount, int src) {
@@ -62,7 +55,6 @@ void bellmanFord(struct Edge edges[], int edgeCount, int src) {
     for (int i = 0; i < V; i++)
         dist[i] = INF;
     dist[src] = 0;
-
     for (int i = 1; i <= V - 1; i++) {
         for (int j = 0; j < edgeCount; j++) {
             int u = edges[j].src;
@@ -72,23 +64,19 @@ void bellmanFord(struct Edge edges[], int edgeCount, int src) {
                 dist[v] = dist[u] + weight;
         }
     }
-
-    int negativeCycleFound = 0;
     for (int j = 0; j < edgeCount; j++) {
         int u = edges[j].src;
         int v = edges[j].dest;
         int weight = edges[j].weight;
         if (dist[u] != INF && dist[u] + weight < dist[v]) {
-            negativeCycleFound = 1;
-            break;
+            printf("\nGraph contains a negative weight cycle.\n");
+            return;
         }
     }
-
     printf("\nBellman-Ford Algorithm (Handles negative edges):\n");
     printf("Node\tDistance\tLocation Name\n");
-    printf("----\t--------\t--------------\n");
     for (int i = 0; i < V; i++)
-        printf("%d\t\t\t%d\t\t%s\n", i, dist[i], locationNames[i]);
+        printf("%d\t%d\t\t%s\n", i, dist[i], locationNames[i]);
 }
 
 int main() {
@@ -99,44 +87,29 @@ int main() {
 
     graph[0][1] = 3;
     graph[0][6] = 9;
-
     graph[1][0] = 3;
     graph[1][2] = 13;
-
     graph[2][1] = 13;
     graph[2][3] = 5;
-
     graph[3][2] = 5;
     graph[3][4] = 8;
-
     graph[4][3] = 8;
-    graph[4][11] = 10;
-
     graph[5][11] = 7;
-
     graph[6][7] = 6;
     graph[6][0] = 9;
-
     graph[7][6] = 6;
     graph[7][8] = 5;
-
     graph[8][7] = 5;
-    graph[8][9] = 1;
     graph[8][12] = 4;
-
     graph[9][8] = 1;
     graph[9][10] = 12;
-
     graph[10][9] = 12;
     graph[10][11] = 15;
-
     graph[11][5] = 7;
     graph[11][4] = 10;
     graph[11][10] = 15;
-
     graph[12][8] = 4;
     graph[12][13] = 2;
-
     graph[13][12] = 2;
 
     dijkstra(graph, 0);
