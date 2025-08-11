@@ -1,29 +1,33 @@
 #include <stdio.h>
 #include <limits.h>
 
-#define V 6
-#define INF INT_MAX
+#define V 14
+#define INF 99999
 
-const char *location_names[V] = {
-    "Admission Office",
-    "AB-4",
-    "Gym",
-    "Medical Center",
-    "Food Court",
-    "YKSG-2"
+struct Edge {
+    int src, dest, weight;
 };
 
-void print_result(int dist[]) {
-    for (int i = 0; i < V; i++) {
-        if (dist[i] == INF)
-            printf("  To %s (Node %d): INF\n", location_names[i], i);
-        else
-            printf("  To %s (Node %d): %d\n", location_names[i], i, dist[i]);
-    }
-}
+const char *locationNames[V] = {
+    "Admission Office",
+    "AB-4",
+    "Food Court",
+    "Gym",
+    "Medical Center",
+    "Engineering Building",
+    "Green Garden",
+    "Central Mosque",
+    "AB-1",
+    "Innovation Lab",
+    "Rowsonara Hall",
+    "YKSG-2",
+    "Transport",
+    "YKSG-1"
+};
 
 void dijkstra(int graph[V][V], int src) {
     int dist[V], visited[V];
+
     for (int i = 0; i < V; i++) {
         dist[i] = INF;
         visited[i] = 0;
@@ -37,21 +41,22 @@ void dijkstra(int graph[V][V], int src) {
                 min = dist[v];
                 u = v;
             }
-        if (u == -1) break;
+
         visited[u] = 1;
 
         for (int v = 0; v < V; v++)
             if (!visited[v] && graph[u][v] != INF && dist[u] + graph[u][v] < dist[v])
                 dist[v] = dist[u] + graph[u][v];
     }
-    print_result(dist);
+
+    printf("\nDijkstra's Algorithm (No negative edges):\n");
+    printf("Node\tDistance\tLocation Name\n");
+    printf("----\t--------\t--------------\n");
+    for (int i = 0; i < V; i++)
+        printf("%d\t\t\t%d\t\t%s\n", i, dist[i], locationNames[i]);
 }
 
-struct Edge {
-    int src, dest, weight;
-};
-
-int bellman_ford(struct Edge edges[], int edgeCount, int src) {
+void bellmanFord(struct Edge edges[], int edgeCount, int src) {
     int dist[V];
     for (int i = 0; i < V; i++)
         dist[i] = INF;
@@ -61,23 +66,28 @@ int bellman_ford(struct Edge edges[], int edgeCount, int src) {
         for (int j = 0; j < edgeCount; j++) {
             int u = edges[j].src;
             int v = edges[j].dest;
-            int wt = edges[j].weight;
-            if (dist[u] != INF && dist[u] + wt < dist[v])
-                dist[v] = dist[u] + wt;
+            int weight = edges[j].weight;
+            if (dist[u] != INF && dist[u] + weight < dist[v])
+                dist[v] = dist[u] + weight;
         }
     }
 
+    int negativeCycleFound = 0;
     for (int j = 0; j < edgeCount; j++) {
         int u = edges[j].src;
         int v = edges[j].dest;
-        int wt = edges[j].weight;
-        if (dist[u] != INF && dist[u] + wt < dist[v]) {
-            printf("  Graph contains a negative weight cycle.\n");
-            return 1;
+        int weight = edges[j].weight;
+        if (dist[u] != INF && dist[u] + weight < dist[v]) {
+            negativeCycleFound = 1;
+            break;
         }
     }
-    print_result(dist);
-    return 0;
+
+    printf("\nBellman-Ford Algorithm (Handles negative edges):\n");
+    printf("Node\tDistance\tLocation Name\n");
+    printf("----\t--------\t--------------\n");
+    for (int i = 0; i < V; i++)
+        printf("%d\t\t\t%d\t\t%s\n", i, dist[i], locationNames[i]);
 }
 
 int main() {
@@ -87,40 +97,60 @@ int main() {
             graph[i][j] = INF;
 
     graph[0][1] = 3;
-    graph[0][2] = 5;
-    graph[1][3] = 4;
-    graph[1][2] = 2;
-    graph[2][3] = 1;
-    graph[3][4] = 6;
-    graph[4][5] = 8;
+    graph[0][6] = 9;
 
-    printf("Dijkstra's Shortest Paths (Source: %s):\n", location_names[0]);
+    graph[1][0] = 3;
+    graph[1][2] = 13;
+
+    graph[2][1] = 13;
+    graph[2][3] = 5;
+
+    graph[3][2] = 5;
+    graph[3][4] = 8;
+
+    graph[4][3] = 8;
+    graph[4][11] = 10;
+
+    graph[5][11] = 7;
+
+    graph[6][7] = 6;
+    graph[6][0] = 9;
+
+    graph[7][6] = 6;
+    graph[7][8] = 5;
+
+    graph[8][7] = 5;
+    graph[8][9] = 1;
+    graph[8][12] = 4;
+
+    graph[9][8] = 1;
+    graph[9][10] = 12;
+
+    graph[10][9] = 12;
+    graph[10][11] = 15;
+
+    graph[11][5] = 7;
+    graph[11][4] = 10;
+    graph[11][10] = 15;
+
+    graph[12][8] = 4;
+    graph[12][13] = 2;
+
+    graph[13][12] = 2;
+
     dijkstra(graph, 0);
 
-    struct Edge edges_bellman[] = {
-        {0, 1, 3},
-        {0, 2, 5},
-        {1, 3, 4},
-        {1, 2, -2},
-        {2, 3, 1},
-        {3, 4, 6},
-        {4, 5, 8}
+    struct Edge edges[] = {
+        {0,1,3},{0,6,9},{1,0,3},{1,2,13},{2,1,13},
+        {2,3,5},{3,2,5},{3,4,8},{4,3,8},{4,11,-10},
+        {5,11,7},{6,7,6},{6,0,9},{7,6,6},{7,8,5},
+        {8,7,5},{8,9,-2},{8,12,4},{9,8,1},{9,10,12},
+        {10,9,12},{10,11,15},{11,5,-3},{11,4,10},{11,10,15},
+        {12,8,4},{12,13,2},{13,12,2}
     };
-    int edgeCount_bellman = sizeof(edges_bellman) / sizeof(edges_bellman[0]);
+    int edgeCount = sizeof(edges)/sizeof(edges[0]);
 
-    printf("\nBellman-Ford Shortest Paths (Source: %s):\n", location_names[0]);
-    bellman_ford(edges_bellman, edgeCount_bellman, 0);
-
-    struct Edge edges_negative_cycle[] = {
-        {0, 1, 1},
-        {1, 2, -1},
-        {2, 3, -1},
-        {3, 1, -1}
-    };
-    int negCount = sizeof(edges_negative_cycle) / sizeof(edges_negative_cycle[0]);
-
-    printf("\nBellman-Ford with a Negative Cycle (Source: %s):\n", location_names[0]);
-    bellman_ford(edges_negative_cycle, negCount, 0);
+    bellmanFord(edges, edgeCount, 0);
 
     return 0;
 }
